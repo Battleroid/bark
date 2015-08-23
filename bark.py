@@ -1,3 +1,6 @@
+__author__ = 'Casey Weed'
+__version__ = '1.0'
+
 import json
 import errno
 import shutil
