@@ -26,7 +26,6 @@ setup(
         classifiers=[
             'Programming Language :: Python',
             'Topic :: Internet',
-            'Topic :: Internet :: WWW/FTP',
             'Topic :: Internet :: WWW/HTTP :: Site Management',
             'Topic :: Text Processing',
             'Topic :: Text Processing :: Markup',
