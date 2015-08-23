@@ -10,11 +10,13 @@ Bark is a single file static site generator. I set out to make it primarily beca
 
 ### Installation
 
-`python setup.py install --user`
+    python setup.py install --user
 
 or
 
-`sudo python setup.py install` for system wide installation.
+    sudo python setup.py install
+    
+for system wide installation.
 
 ### Usage
 
