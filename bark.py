@@ -1,24 +1,27 @@
 import json
 import errno
 import shutil
-from slugify import slugify
-from dateutil import parser
 import misaka as ms
-import frontmatter as ft
-from jinja2 import Environment, FileSystemLoader, Template, DictLoader
 from datetime import datetime
 import sys
 import os
+from slugify import slugify
+from dateutil import parser
+import frontmatter as ft
+from jinja2 import Environment, FileSystemLoader, Template, DictLoader
+
 
 def walk_files(start):
     for root, dirs, files in os.walk(start):
         for f in files:
             yield os.path.join(root, f)
 
+
 def walk_directories(start):
     for root, dirs, files in os.walk(start):
         for d in dirs:
             yield os.path.join(root, d)
+
 
 def mkdirp(path):
     try:
@@ -28,6 +31,7 @@ def mkdirp(path):
             pass
         else:
             raise
+
 
 BASE_BASE = """
 <!DOCTYPE html>
@@ -78,8 +82,8 @@ BASE_TEMPLATES = {
     'post.html': BASE_POST
 }
 
-class Post(object):
 
+class Post(object):
     def __init__(self, filename, settings):
         self.filename = filename
         self.matter = ft.load(self.filename).to_dict()
@@ -104,8 +108,8 @@ class Post(object):
         created = datetime.fromtimestamp(os.stat(filename).st_ctime)
         return created.strftime('%Y-%m-%d %H:%M')
 
-class Settings(object):
 
+class Settings(object):
     def __init__(self, settings):
         self.templates = settings.get('templates', None)
         self.static = settings.get('static', 'static')
@@ -116,8 +120,8 @@ class Settings(object):
         self.site_url = settings.get('site_url', '/')
         self.misc = settings.get('misc', {})
 
-class Engine(object):
 
+class Engine(object):
     def __init__(self, settings):
         self.settings = Settings(settings)
         self.files = []
@@ -176,7 +180,6 @@ class Engine(object):
         for post in self.posts:
             with open(os.path.join(self.settings.output, post.url), 'w') as f:
                 f.write(post_tmpl.render(post=post, settings=self.settings))
-
 
     def build(self):
         self.load_posts()
