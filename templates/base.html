@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<h1><a href="{{ settings.site_url }}">{{ settings.site_name }}</a></h1>
+	<small>by {{ settings.site_author }}</small>
+	<article>
+		{% block content %}
+		{% endblock %}
+	</article>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+	{% for post in posts %}
+	<li><a href="{{ site_url }}/{{ post.url }}">{{ post.title }}</a></li>
+	{% endfor %}
+</ul>
+{% endblock %}
