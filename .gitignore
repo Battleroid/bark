@@ -1,4 +1,7 @@
 # misc
+*.old
+templates/
+static/
 content/
 output/
 settings.json

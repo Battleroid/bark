@@ -1,47 +1,113 @@
 import json
+import errno
+import shutil
 from slugify import slugify
 from dateutil import parser
 import misaka as ms
 import frontmatter as ft
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound, Markup, Template
+from jinja2 import Environment, FileSystemLoader, Template, DictLoader
 from datetime import datetime
 import sys
 import os
 
-def walk_folder(start):
+def walk_files(start):
     for root, dirs, files in os.walk(start):
         for f in files:
             yield os.path.join(root, f)
 
+def walk_directories(start):
+    for root, dirs, files in os.walk(start):
+        for d in dirs:
+            yield os.path.join(root, d)
+
+def mkdirp(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+BASE_BASE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <title>{{ settings.site_name }}</title>
+        <style type="text/css">
+            body {
+                font: 14px/1.5em sans-serif;
+            }
+        </style>
+</head>
+<body>
+        <h1><a href="{{ settings.site_url }}">{{ settings.site_name }}</a></h1>
+        <small>by {{ settings.site_author }}</small>
+        <article>
+                {% block content %}
+                {% endblock %}
+        </article>
+</body>
+</html>"""
+
+BASE_INDEX = """
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+        {% for post in posts -%}
+        <li><a href="{{ settings.site_url }}/{{ post.url }}">{{ post.title }}</a></li>
+        {% endfor %}
+</ul>
+{% endblock %}"""
+
+BASE_POST = """
+{% extends "base.html" %}
+
+{% block content %}
+<h3>{{ post.title }}</h3>
+<small>By {{ post.author }} at {{ post.date }}</small>
+
+{{ post.rendered }}
+{% endblock %}"""
+
+BASE_TEMPLATES = {
+    'base.html': BASE_BASE,
+    'index.html': BASE_INDEX,
+    'post.html': BASE_POST
+}
+
 class Post(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, settings):
         self.filename = filename
         self.matter = ft.load(self.filename).to_dict()
         self.title = self.matter.get('title', 'Unremarkable Post')
         self.author = self.matter.get('author', 'Anonymous')
+        self.category = self.matter.get('category', None)
         self.slug = self.matter.get('slug', slugify(self.title))
-        self.url = '.'.join([self.slug, 'html'])
+        if not self.category:
+            self.url = '.'.join([self.slug, 'html'])
+        else:
+            self.url = '/'.join([self.category, '.'.join([self.slug, 'html'])])
         if 'date' in self.matter:
             d = parser.parse(self.matter['date'])
             self.date = d.strftime('%Y-%m-%d %H:%M')
         else:
             self.date = self.get_create_time(filename)
-        self.content = self.matter.get('content', 'No content.')
-        # self.html = ms.html(self.content)
-        # TODO: Use template to create a template from string, store the result as html
-        t = Template(self.content)
-        self.html = ms.html(t.render(post=self))
+        self.raw = self.matter.get('content', '')
+        self.html = ms.html(ms.SmartyPants().postprocess(self.raw))
+        self.rendered = Template(self.html).render(post=self, settings=settings)
 
-    @classmethod
-    def get_create_time(cls, filename):
+    def get_create_time(self, filename):
         created = datetime.fromtimestamp(os.stat(filename).st_ctime)
         return created.strftime('%Y-%m-%d %H:%M')
 
 class Settings(object):
 
     def __init__(self, settings):
-        self.templates = settings.get('templates', 'templates')
+        self.templates = settings.get('templates', None)
         self.static = settings.get('static', 'static')
         self.content = settings.get('content', 'content')
         self.output = settings.get('output', 'output')
@@ -56,48 +122,66 @@ class Engine(object):
         self.settings = Settings(settings)
         self.files = []
         self.posts = []
+        self.categories = set()
         self.jinja = Environment()
-        self.jinja.loader = FileSystemLoader(self.settings.templates)
+        if self.settings.templates:
+            self.jinja.loader = FileSystemLoader(self.settings.templates)
+        else:
+            self.jinja.loader = DictLoader(BASE_TEMPLATES)
         self.jinja.globals = dict(settings=self.settings, posts=self.posts)
 
-    def load_files(self):
+    def load_posts(self):
         print 'Looking for content in "{}":'.format(self.settings.content)
-        for f in walk_folder(self.settings.content):
+        for f in walk_files(self.settings.content):
             if f.endswith(('.md', '.MD')):
                 self.files.append(f)
                 print '+ Loaded "{}"'.format(os.path.basename(f))
 
-    def grab_template(self, name):
-        try:
-            return self.jinja.get_template(name, globals=self.settings)
-        except TemplateNotFound, e:
-            print e.message
-
-    def prepare_output(self):
-        # TODO: prepare output by genning dirs, copying static files, etc
-        pass
-
-    def build_index(self):
-        # TODO: save index to output
-        index = self.jinja.get_or_select_template('index.html')
-        print index.render()
-
-    def build_posts(self):
-        post = self.jinja.get_template('post.html')
-        for p in self.posts:
-            # TODO: save render to file in output directory
-            t = Template(p.content)
-            html = ms.html(t.render(post=p, settings=self.settings))
-            print post.render(html)
-
-    def assess_posts(self):
+    def order_posts(self):
         for f in self.files:
-            self.posts.append(Post(f))
+            post = Post(f, self.settings)
+            if post.category:
+                self.categories.add(post.category)
+            self.posts.append(post)
         self.posts = sorted(self.posts, key=lambda p: p.date)
 
+    def prepare_output(self):
+        if not os.path.exists(self.settings.output):
+            os.mkdir(self.settings.output)
+        shutil.copytree(self.settings.static,
+                        os.path.join(self.settings.output,
+                                     self.settings.static))
+        for f in walk_files(self.settings.static):
+            dest = os.path.join(self.settings.output, f)
+            try:
+                shutil.copy(f, dest)
+            except OSError as e:
+                if e.errno == errno.EEXIST and os.path.isfile(dest):
+                    pass
+                else:
+                    raise
+        category_dirs = [os.path.join(self.settings.output, category)
+                         for category in self.categories]
+        for c in category_dirs:
+            mkdirp(c)
+
+    def build_index(self):
+        index_tmpl = self.jinja.get_template('index.html')
+        with open(os.path.join(self.settings.output, 'index.html'), 'w') as f:
+            f.write(index_tmpl.render())
+
+    def build_posts(self):
+        # post_tmpl = self.jinja.get_template('post.html')
+        post_tmpl = self.jinja.get_template('post.html')
+        for post in self.posts:
+            with open(os.path.join(self.settings.output, post.url), 'w') as f:
+                f.write(post_tmpl.render(post=post, settings=self.settings))
+
+
     def build(self):
-        self.load_files()
-        self.assess_posts()
+        self.load_posts()
+        self.order_posts()
+        self.prepare_output()
         self.build_index()
         self.build_posts()
 
