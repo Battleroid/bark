@@ -27,6 +27,9 @@ def walk_directories(start):
 
 
 def mkdirp(path):
+    """
+    Replicate mkdir -p functionality.
+    """
     try:
         os.makedirs(path)
     except OSError as e:

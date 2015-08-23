@@ -1,4 +1,5 @@
 # misc
+*.swp
 *.old
 templates/
 static/
