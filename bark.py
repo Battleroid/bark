@@ -141,6 +141,9 @@ class Engine(object):
         self.jinja.globals = dict(settings=self.settings, posts=self.posts)
 
     def load_posts(self):
+        """
+        Load markdown (.md) posts from our content directory.
+        """
         print 'Looking for content in "{}":'.format(self.settings.content)
         for f in walk_files(self.settings.content):
             if f.endswith(('.md', '.MD')):
@@ -148,14 +151,21 @@ class Engine(object):
                 print '+ Loaded "{}"'.format(os.path.basename(f))
 
     def order_posts(self):
+        """
+        Order the posts according to date.
+        """
         for f in self.files:
             post = Post(f, self.settings)
             if post.category:
                 self.categories.add(post.category)
             self.posts.append(post)
-        self.posts = sorted(self.posts, key=lambda p: p.date)
+        self.posts = sorted(self.posts, key=lambda p: p.date, reverse=True)
 
     def prepare_output(self):
+        """
+        Prep output directories, move static files, and copy post category
+        directory tree.
+        """
         if not os.path.exists(self.settings.output):
             os.mkdir(self.settings.output)
         shutil.copytree(self.settings.static,
@@ -176,12 +186,18 @@ class Engine(object):
             mkdirp(c)
 
     def build_index(self):
+        """
+        Create the index, save in output.
+        """
         index_tmpl = self.jinja.get_template('index.html')
         with open(os.path.join(self.settings.output, 'index.html'), 'w') as f:
             f.write(index_tmpl.render())
 
     def build_posts(self):
-        # post_tmpl = self.jinja.get_template('post.html')
+        """
+        Render posts, save output in appropriate category or default output
+        directory.
+        """
         post_tmpl = self.jinja.get_template('post.html')
         for post in self.posts:
             with open(os.path.join(self.settings.output, post.url), 'w') as f:
