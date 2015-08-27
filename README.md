@@ -27,3 +27,10 @@ for system wide installation.
 ### Contributing
 
 If something is wrong or could be improved, let me know or submit a pull request.
+
+### To Do
+
+- [ ] set it up with argparse for basic command line options
+- [ ] ability to set your own layouts per post, this will also allow you to create separate pages
+- [ ] default templates are only loaded if they are not found within the template directory
+- [ ] I feel like there should be a better way to render the posts without replicating settings over and over
