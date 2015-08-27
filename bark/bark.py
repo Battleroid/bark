@@ -1,6 +1,17 @@
-__author__ = 'Casey Weed'
-__version__ = '1.0'
+"""Bark
 
+Usage:
+    bark new <name>
+    bark make [<settings>]
+
+Options:
+    -h --help Show this screen.
+    --version Show version.
+"""
+__author__ = 'Casey Weed'
+__version__ = '1.1'
+
+from docopt import docopt
 import json
 import errno
 import shutil
@@ -168,9 +179,15 @@ class Engine(object):
         """
         if not os.path.exists(self.settings.output):
             os.mkdir(self.settings.output)
-        shutil.copytree(self.settings.static,
-                        os.path.join(self.settings.output,
-                                     self.settings.static))
+        try:
+            shutil.copytree(self.settings.static,
+                            os.path.join(self.settings.output,
+                                         self.settings.static))
+        except OSError as e:
+            if e.errno == errno.EEXIST and os.path.isdir(self.settings.static):
+                pass
+            else:
+                raise
         for f in walk_files(self.settings.static):
             dest = os.path.join(self.settings.output, f)
             try:
@@ -211,8 +228,49 @@ class Engine(object):
         self.build_posts()
 
 
+def create_new_site(location):
+    """
+    Create new blank site at location. Includes basic settings file, templates,
+    and content directory.
+    """
+    if not os.path.exists(location):
+        os.mkdir(location)
+    defaults = Settings({})
+    if not defaults.templates:
+        defaults.templates = 'templates'
+    if not os.path.exists(os.path.join(location, defaults.templates)):
+        os.mkdir(os.path.join(location, defaults.templates))
+    if not os.path.exists(os.path.join(location, defaults.content)):
+        os.mkdir(os.path.join(location, defaults.content))
+    if not os.path.exists(os.path.join(location, defaults.static)):
+        os.mkdir(os.path.join(location, defaults.static))
+    for name, content in BASE_TEMPLATES.iteritems():
+        with open(os.path.join(location, defaults.templates, name), 'w') as f:
+            f.write(content)
+    with open(os.path.join(location, 'settings.json'), 'w') as f:
+        f.write(json.dumps(defaults.__dict__))
+
+
+def parse_args():
+    arguments = docopt(__doc__, version='Bark {}'.format(__version__))
+    if arguments['new']:
+        if arguments['<name>']:
+            create_new_site(arguments['<name>'])
+            sys.exit(0)
+        create_new_site('myblog')
+    if arguments['make']:
+        if arguments['<settings>']:
+            config = open(arguments['<settings>'], 'r').read()
+            settings = json.loads(config)
+            engine = Engine(settings)
+            engine.build()
+            sys.exit(0)
+        config = open('settings.json', 'r').read()
+        settings = json.loads(config)
+        engine = Engine(settings)
+        engine.build()
+        sys.exit(0)
+
+
 def main():
-    config = open(sys.argv[1], 'r').read()
-    settings = json.loads(config)
-    engine = Engine(settings)
-    engine.build()
+    parse_args()

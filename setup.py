@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
         name='bark-ssg',
-        version='1.0',
+        version='1.1',
         url='https://github.com/battleroid/bark',
         description='Single file static site generator.',
         license='MIT License',
@@ -16,7 +16,8 @@ setup(
             'python-frontmatter>=0.2.1',
             'python-slugify>=1.1.3',
             'python-dateutil>=2.4.2',
-            'misaka>=1.0.2'
+            'misaka>=1.0.2',
+            'docopt>=0.6.2'
             ],
         setup_requires=[],
         entry_points={
