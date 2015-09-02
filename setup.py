@@ -1,8 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-        setup_cfg=True,
-        setup_requires=['setup.cfg'],
+        setup_requires=[],
         name='bark-ssg',
         version='1.3',
         url='https://github.com/battleroid/bark',
