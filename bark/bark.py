@@ -63,7 +63,7 @@ BASE_BASE = """
         </style>
 </head>
 <body>
-        <h1>{% if settings.site_url %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}{% endif %}</h1>
+        <h1>{% if settings.site_url is not none %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}{% endif %}</h1>
         <small>by {{ settings.site_author }}</small>
         <article>
                 {% block content %}
@@ -78,7 +78,7 @@ BASE_INDEX = """
 {% block content %}
 <ul>
         {% for post in posts -%}
-        <li><a href="{% if settings.site_url %}{{ settings.site_url }}/{% endif %}{{ post.url }}">{{ post.title }}</a></li>
+        <li><a href="{% if settings.site_url is not none %}{{ settings.site_url }}/{% endif %}{{ post.url }}">{{ post.title }}</a></li>
         {% endfor %}
 </ul>
 {% endblock %}"""
