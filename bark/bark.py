@@ -63,7 +63,7 @@ BASE_BASE = """
         </style>
 </head>
 <body>
-        <h1><a href="{{ settings.site_url }}">{{ settings.site_name }}</a></h1>
+        <h1>{% if settings.site_url %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}</h1>
         <small>by {{ settings.site_author }}</small>
         <article>
                 {% block content %}
@@ -78,7 +78,7 @@ BASE_INDEX = """
 {% block content %}
 <ul>
         {% for post in posts -%}
-        <li><a href="{{ settings.site_url }}/{{ post.url }}">{{ post.title }}</a></li>
+        <li><a href="{% if settings.site_url %}{{ settings.site_url }}/{% endif %}{{ post.url }}">{{ post.title }}</a></li>
         {% endfor %}
 </ul>
 {% endblock %}"""
@@ -108,10 +108,9 @@ class Post(object):
         self.author = self.matter.get('author', 'Anonymous')
         self.category = self.matter.get('category', None)
         self.slug = self.matter.get('slug', slugify(self.title))
-        if not self.category:
-            self.url = '.'.join([self.slug, 'html'])
-        else:
-            self.url = '/'.join([self.category, '.'.join([self.slug, 'html'])])
+        self.url = '.'.join([self.slug, 'html'])
+        if self.category:
+            self.url = '/'.join([self.category, self.url])
         if 'date' in self.matter:
             d = parser.parse(self.matter['date'])
             self.date = d.strftime('%Y-%m-%d %H:%M')
@@ -134,7 +133,7 @@ class Settings(object):
         self.output = settings.get('output', 'output')
         self.site_name = settings.get('site_name', 'My Blog')
         self.site_author = settings.get('site_author', 'Anonymous')
-        self.site_url = settings.get('site_url', '/')
+        self.site_url = settings.get('site_url', None)
         self.misc = settings.get('misc', {})
 
 
