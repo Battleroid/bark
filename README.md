@@ -8,7 +8,7 @@ I hope to continually improve it so perhaps others might find it useful.
 
 * Single file
 * Jinja2 templating language
-* Posts support markdown formatting thanks to Misaka with SmartyPants.
+* Posts support markdown formatting thanks to Hoedown with SmartyPants.
 
 ### Installation
 
