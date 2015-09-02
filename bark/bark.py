@@ -9,7 +9,7 @@ Options:
     --version Show version.
 """
 __author__ = 'Casey Weed'
-__version__ = '1.1'
+__version__ = '1.2'
 
 from docopt import docopt
 import json
@@ -63,7 +63,7 @@ BASE_BASE = """
         </style>
 </head>
 <body>
-        <h1>{% if settings.site_url %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}</h1>
+        <h1>{% if settings.site_url %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}{% endif %}</h1>
         <small>by {{ settings.site_author }}</small>
         <article>
                 {% block content %}
