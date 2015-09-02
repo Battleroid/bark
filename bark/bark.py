@@ -5,17 +5,17 @@ Usage:
     bark make [<settings>]
 
 Options:
-    -h --help Show this screen.
-    --version Show version.
+    -h --help  Show this screen.
+    --version  Show version.
 """
 __author__ = 'Casey Weed'
-__version__ = '1.2'
+__version__ = '1.3'
 
 from docopt import docopt
 import json
 import errno
 import shutil
-import misaka as ms
+from hoedown import Markdown, HtmlRenderer, SmartyPants
 from datetime import datetime
 import sys
 import os
@@ -63,7 +63,7 @@ BASE_BASE = """
         </style>
 </head>
 <body>
-        <h1>{% if settings.site_url is not none %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}{% endif %}</h1>
+        <h1>{% if settings.site_url %}<a href="{{ settings.site_url }}">{{ settings.site_name }}</a>{% else %}{{ settings.site_name }}{% endif %}</h1>
         <small>by {{ settings.site_author }}</small>
         <article>
                 {% block content %}
@@ -78,7 +78,7 @@ BASE_INDEX = """
 {% block content %}
 <ul>
         {% for post in posts -%}
-        <li><a href="{% if settings.site_url is not none %}{{ settings.site_url }}/{% endif %}{{ post.url }}">{{ post.title }}</a></li>
+        <li><a href="{% if settings.site_url %}{{ settings.site_url }}/{% endif %}{{ post.url }}">{{ post.title }}</a></li>
         {% endfor %}
 </ul>
 {% endblock %}"""
@@ -99,6 +99,8 @@ BASE_TEMPLATES = {
     'post.html': BASE_POST
 }
 
+class HtmlRenderer(HtmlRenderer, SmartyPants):
+    pass
 
 class Post(object):
     def __init__(self, filename, settings):
@@ -117,7 +119,7 @@ class Post(object):
         else:
             self.date = self.get_create_time(filename)
         self.raw = self.matter.get('content', '')
-        self.html = ms.html(ms.SmartyPants().postprocess(self.raw))
+        self.html = Markdown(HtmlRenderer()).render(self.raw)
         self.rendered = Template(self.html).render(post=self, settings=settings)
 
     def get_create_time(self, filename):
@@ -205,6 +207,7 @@ class Engine(object):
         """
         Create the index, save in output.
         """
+        print '+ Building index'
         index_tmpl = self.jinja.get_template('index.html')
         with open(os.path.join(self.settings.output, 'index.html'), 'w') as f:
             f.write(index_tmpl.render())
@@ -217,6 +220,7 @@ class Engine(object):
         post_tmpl = self.jinja.get_template('post.html')
         for post in self.posts:
             with open(os.path.join(self.settings.output, post.url), 'w') as f:
+                print '+ Building {}'.format(post.url)
                 f.write(post_tmpl.render(post=post, settings=self.settings))
 
     def build(self):
@@ -225,6 +229,7 @@ class Engine(object):
         self.prepare_output()
         self.build_index()
         self.build_posts()
+        print 'Finished'
 
 
 def create_new_site(location):
