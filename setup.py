@@ -21,7 +21,6 @@ setup(
             'hoedown>=0.2',
             'docopt>=0.6.2'
             ],
-        setup_requires=[],
         entry_points={
             'console_scripts': ['bark = bark.bark:main']
             },
