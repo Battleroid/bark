@@ -28,6 +28,7 @@ for system wide installation.
 
     Options:
         -h --help  Show this screen.
+		--version  Show version.
 
 ### Contributing
 
