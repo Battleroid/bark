@@ -12,7 +12,7 @@ Features
 
 * Single file
 * Jinja2 templating language
-* Posts support markdown formatting thanks to Misaka with SmartyPants.
+* Posts support markdown formatting thanks to Hoedown with SmartyPants.
 
 ------------
 Installation
