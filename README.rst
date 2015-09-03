@@ -1,4 +1,3 @@
-====
 Bark
 ====
 
@@ -6,7 +5,6 @@ Bark is a single file static site generator. I set out to make it primarily beca
 
 I hope to continually improve it so perhaps others might find it useful.
 
---------
 Features
 --------
 
@@ -14,7 +12,6 @@ Features
 * Jinja2 templating language
 * Posts support markdown formatting thanks to Hoedown with SmartyPants.
 
-------------
 Installation
 ------------
 
@@ -28,21 +25,15 @@ or::
     
 for system wide installation.
 
------
 Usage
 -----
 
-You can get the usage by using ``-h``, ``--help``, or ``bark``.
+Usage: ``bark [options] (new NAME|make [SETTINGS])``
 
-    Usage:
-        bark new <name>
-        bark make [<settings>]
+-h, --help       Show this message.
+--version        Show version.
 
-    Options:
-        -h --help  Show this screen.
-        --version  Show version.
 
-------------
 Contributing
 ------------
 
