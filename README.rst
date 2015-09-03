@@ -32,7 +32,7 @@ for system wide installation.
 Usage
 -----
 
-You can get the usage by using ``-h``, ``--help``, or ``bark``.::
+You can get the usage by using ``-h``, ``--help``, or ``bark``.
 
     Usage:
         bark new <name>
@@ -40,7 +40,7 @@ You can get the usage by using ``-h``, ``--help``, or ``bark``.::
 
     Options:
         -h --help  Show this screen.
-		--version  Show version.
+        --version  Show version.
 
 ------------
 Contributing
