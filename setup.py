@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
         setup_requires=[],
         name='bark-ssg',
-        version='1.3.2',
+        version='1.3.3',
         url='https://github.com/battleroid/bark',
         description='Single file static site generator.',
         license='MIT License',
