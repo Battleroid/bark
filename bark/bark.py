@@ -9,7 +9,7 @@ Options:
     --version  Show version.
 """
 __author__ = 'Casey Weed'
-__version__ = '1.3.2'
+__version__ = '1.3.3'
 
 from docopt import docopt
 import json
@@ -265,11 +265,13 @@ def parse_args():
     if arguments['make']:
         if arguments['<settings>']:
             config = open(arguments['<settings>'], 'r').read()
+            os.chdir(os.path.dirname(arguments['<settings>']))
             settings = json.loads(config)
             engine = Engine(settings)
             engine.build()
             sys.exit(0)
         config = open('settings.json', 'r').read()
+        os.chdir(os.path.dirname(arguments['<settings>']))
         settings = json.loads(config)
         engine = Engine(settings)
         engine.build()
