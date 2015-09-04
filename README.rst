@@ -51,3 +51,5 @@ Over the past couple weeks I've noticed that I made this pretty bad, so here's m
 * Pagination, straightforward to implement, include pagination object/dict.
 * More descriptive console output when building; verbosity levels.
 * Better and more numerous configuration options that override the settings for quick fixes, checks, etc. Possibly demo the site using SimpleHTTPServer.
+* More frontmatter options for posts, such as: date that accepts date + time and just date, custom slugs (catch multiple slugs with same name), more?
+* Draft functionality for posts, simple boolean switch.
