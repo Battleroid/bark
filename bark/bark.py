@@ -9,7 +9,7 @@ Options:
     --version  Show version.
 """
 __author__ = 'Casey Weed'
-__version__ = '1.3.3'
+__version__ = '1.3.4'
 
 from docopt import docopt
 import json
