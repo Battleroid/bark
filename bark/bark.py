@@ -271,7 +271,6 @@ def parse_args():
             engine.build()
             sys.exit(0)
         config = open('settings.json', 'r').read()
-        os.chdir(os.path.dirname(arguments['<settings>']))
         settings = json.loads(config)
         engine = Engine(settings)
         engine.build()
